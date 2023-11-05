@@ -1,3 +1,9 @@
+import openai
+
+# Set your OpenAI API key
+api_key = "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"
+openai.api_key = api_key
+
 # Define an AI-driven risk assessment module
 class RiskAssessment:
     @staticmethod
@@ -23,25 +29,17 @@ class RiskAssessment:
 
         return risk_score
 
-# Define an AI-powered chatbot for customer support
-class Chatbot:
-    @staticmethod
-    def answer_question(question):
-        # Simulate chatbot responses
-        if "coverage" in question:
-            return "Your coverage type is General Liability."
-        elif "premium" in question:
-            return "Your monthly premium is $500."
-        else:
-            return "I'm sorry, I cannot answer that question right now."
-
-# Get user inputs for business attributes
-business_name = input("Enter your business name: ")
-industry = input("Enter your industry (e.g., retail, manufacturing, technology): ")
-location = input("Enter your business location (e.g., urban, suburban, rural): ")
-
-# Calculate the risk factor based on user inputs
-risk_score = RiskAssessment.assess_risk(business_name, industry, location)
+# Function to generate AI responses
+def generate_response(prompt):
+    response = openai.Completion.create(
+        engine="text-davinci-002",  # Choose an appropriate engine
+        prompt=prompt,
+        max_tokens=50,  # Adjust this based on desired response length
+        n=1,  # Number of responses to generate
+        stop=None,  # Optional: Add a list of stop words to limit the response
+    )
+    
+    return response.choices[0].text.strip()
 
 # Update the SmallBusinessInsurance class to integrate AI and risk-based premiums
 class SmallBusinessInsurance:
@@ -76,6 +74,14 @@ class SmallBusinessInsurance:
 
 # Example usage
 if __name__ == "__main__":
+    # Get user inputs for business attributes
+    business_name = input("Enter your business name: ")
+    industry = input("Enter your industry (e.g., retail, manufacturing, technology): ")
+    location = input("Enter your business location (e.g., urban, suburban, rural): ")
+
+    # Calculate the risk factor based on user inputs
+    risk_score = RiskAssessment.assess_risk(business_name, industry, location)
+
     # Create a small business insurance policy with user-input risk factor
     policy1 = SmallBusinessInsurance(business_name, "General Liability", risk_score)
     
@@ -91,5 +97,5 @@ if __name__ == "__main__":
 
     # Interact with the AI-powered chatbot
     user_question = input("Ask a question (e.g., 'What is my premium?'): ")
-    chatbot_response = Chatbot.answer_question(user_question)
+    chatbot_response = generate_response(user_question)
     print(f"Chatbot Response: {chatbot_response}")
