@@ -1,101 +1,102 @@
-import openai
+class InsurancePolicy:
+    def __init__(self, policy_holder, business_type, location, coverage_amount, years_in_business, employees, past_claims):
+        self.policy_holder = policy_holder
+        self.business_type = business_type
+        self.location = location
+        self.coverage_amount = coverage_amount
+        self.years_in_business = years_in_business
+        self.employees = employees
+        self.past_claims = past_claims
 
-# Set your OpenAI API key
-api_key = "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"
-openai.api_key = api_key
+    def calculate_base_premium(self):
+        # Calculate a base premium based on business type and location
+        base_premium = 0
+        if self.business_type == "Retail":
+            base_premium = 2000
+        elif self.business_type == "Restaurant":
+            base_premium = 3000
+        elif self.business_type == "Technology":
+            base_premium = 4000
 
-# Define an AI-driven risk assessment module
-class RiskAssessment:
-    @staticmethod
-    def assess_risk(business_name, industry, location):
-        # Simulate a basic risk assessment based on user inputs
-        risk_score = 0
-        
-        # Assess risk based on industry
-        if industry.lower() == "retail":
-            risk_score += 10
-        elif industry.lower() == "manufacturing":
-            risk_score += 20
-        elif industry.lower() == "technology":
-            risk_score += 5
+        if self.location == "Urban":
+            base_premium *= 1.2
+        elif self.location == "Suburban":
+            base_premium *= 1.1
 
-        # Assess risk based on location
-        if location.lower() == "urban":
-            risk_score += 15
-        elif location.lower() == "suburban":
-            risk_score += 10
-        elif location.lower() == "rural":
-            risk_score += 5
+        return base_premium
 
-        return risk_score
+    def calculate_risk_factor(self):
+        # Calculate a risk factor based on policy holder's history and years in business
+        risk_factor = 1.0
+        if self.policy_holder == "New Business":
+            risk_factor *= 1.2
+        elif self.policy_holder == "Experienced Business":
+            risk_factor *= 0.9
 
-# Function to generate AI responses
-def generate_response(prompt):
-    response = openai.Completion.create(
-        engine="text-davinci-002",  # Choose an appropriate engine
-        prompt=prompt,
-        max_tokens=50,  # Adjust this based on desired response length
-        n=1,  # Number of responses to generate
-        stop=None,  # Optional: Add a list of stop words to limit the response
-    )
-    
-    return response.choices[0].text.strip()
+        if self.years_in_business < 3:
+            risk_factor *= 1.1  # Increase risk factor for newer businesses
 
-# Update the SmallBusinessInsurance class to integrate AI and risk-based premiums
-class SmallBusinessInsurance:
-    def __init__(self, business_name, coverage_type, risk_score):
-        self.business_name = business_name
-        self.coverage_type = coverage_type
-        self.claims = []
-        self.risk_score = risk_score
-        self.premium = self.calculate_premium()
+        return risk_factor
+
+    def calculate_coverage_factor(self):
+        # Calculate a coverage factor based on coverage amount
+        coverage_factor = 1.0
+        if self.coverage_amount > 50000:
+            coverage_factor *= 1.1  # Increase coverage factor for higher coverage
+
+        return coverage_factor
+
+    def calculate_employee_factor(self):
+        # Calculate a factor based on the number of employees
+        employee_factor = 1.0
+        if self.employees > 10:
+            employee_factor *= 1.2  # Increase factor for larger businesses
+
+        return employee_factor
+
+    def calculate_past_claim_factor(self):
+        # Calculate a factor based on past claims history
+        claim_factor = 1.0
+        if self.past_claims > 0:
+            claim_factor *= 1.5  # Increase factor for businesses with past claims
+
+        # Ensure a minimum claim factor of 0.8, even if there are no past claims
+        claim_factor = max(claim_factor, 0.8)
+
+        return claim_factor
 
     def calculate_premium(self):
-        # Define a base premium
-        base_premium = 500
-        
-        # Adjust the premium based on risk score
-        premium = base_premium + self.risk_score
-        
-        return premium
+        # Calculate the final premium by combining all factors
+        base_premium = self.calculate_base_premium()
+        risk_factor = self.calculate_risk_factor()
+        coverage_factor = self.calculate_coverage_factor()
+        employee_factor = self.calculate_employee_factor()
+        claim_factor = self.calculate_past_claim_factor()
 
-    def file_claim(self, claim_description):
-        self.claims.append(claim_description)
-        print(f"Claim filed for {self.business_name}: {claim_description}")
+        final_premium = base_premium * risk_factor * coverage_factor * employee_factor * claim_factor
 
-    def display_policy_info(self):
-        print(f"Business Name: {self.business_name}")
-        print(f"Coverage Type: {self.coverage_type}")
-        print(f"Premium: ${self.premium} per month")
-        print(f"Risk Score: {self.risk_score}")
-        print("Claims:")
-        for i, claim in enumerate(self.claims, 1):
-            print(f"{i}. {claim}")
+        return final_premium
 
-# Example usage
-if __name__ == "__main__":
-    # Get user inputs for business attributes
-    business_name = input("Enter your business name: ")
-    industry = input("Enter your industry (e.g., retail, manufacturing, technology): ")
-    location = input("Enter your business location (e.g., urban, suburban, rural): ")
+# Prompt the user for input
+policy_holder = input("Enter the policy holder type (New Business/Experienced Business): ")
+business_type = input("Enter the business type (Retail/Restaurant/Technology): ")
+location = input("Enter the business location (Urban/Suburban): ")
+coverage_amount = float(input("Enter the coverage amount (in USD): "))
+years_in_business = int(input("Enter the years in business: "))
+employees = int(input("Enter the number of employees: "))
+past_claims = int(input("Enter the number of past claims: "))
 
-    # Calculate the risk factor based on user inputs
-    risk_score = RiskAssessment.assess_risk(business_name, industry, location)
+# Calculate the premium based on user input
+policy = InsurancePolicy(policy_holder, business_type, location, coverage_amount, years_in_business, employees, past_claims)
+premium = policy.calculate_premium()
 
-    # Create a small business insurance policy with user-input risk factor
-    policy1 = SmallBusinessInsurance(business_name, "General Liability", risk_score)
-    
-    # Display policy information, including user-defined risk assessment
-    policy1.display_policy_info()
-    
-    # File a claim
-    claim_description = input("Enter the claim description: ")
-    policy1.file_claim(claim_description)
-
-    # Display updated policy information with claims and adjusted premium
-    policy1.display_policy_info()
-
-    # Interact with the AI-powered chatbot
-    user_question = input("Ask a question (e.g., 'What is my premium?'): ")
-    chatbot_response = generate_response(user_question)
-    print(f"Chatbot Response: {chatbot_response}")
+# Display the premium
+print("\nInsurance Premium Calculation Results:")
+print(f"Policy Holder: {policy_holder}")
+print(f"Business Type: {business_type}")
+print(f"Location: {location}")
+print(f"Coverage Amount: ${coverage_amount:.2f}")
+print(f"Years in Business: {years_in_business} years")
+print(f"Number of Employees: {employees}")
+print(f"Past Claims: {past_claims}")
+print(f"Premium: ${premium:.2f}")
